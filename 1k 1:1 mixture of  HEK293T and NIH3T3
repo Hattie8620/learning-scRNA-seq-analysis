@@ -1,0 +1,20 @@
+library(tidyverse)
+library(DropletUtils)
+library(Matrix)
+res_mat <-read.csv("Count_Matrix.tsv", sep = "\t", header = TRUE, row.names=1)
+gene_species <- ifelse(str_detect(rownames(res_mat), "^ENSMUSG"), "mouse", "human")
+mouse_inds <- gene_species == "mouse"
+human_inds <- gene_species == "human"
+# mark cells as mouse or human
+cell_species <- tibble(n_mouse_umi = Matrix::colSums(res_mat[mouse_inds,]),
+                       n_human_umi = Matrix::colSums(res_mat[human_inds,]),
+                       tot_umi = Matrix::colSums(res_mat),
+                       prop_mouse = n_mouse_umi / tot_umi,
+                       prop_human = n_human_umi / tot_umi)
+cell_species<- cell_species %>% 
+  mutate(species = case_when (prop_mouse>0.9 ~ "Mouse",
+    prop_human>0.9  ~ "Human", prop_mouse>0.3& prop_human>0.3 ~ "Mix"
+  ))
+cell_species <- cell_species %>% mutate_if(is.character,as.factor)
+sp<-cell_species$species
+summary(sp)
