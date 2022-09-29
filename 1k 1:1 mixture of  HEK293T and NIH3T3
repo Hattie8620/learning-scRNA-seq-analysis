@@ -18,3 +18,10 @@ cell_species<- cell_species %>%
 cell_species <- cell_species %>% mutate_if(is.character,as.factor)
 sp<-cell_species$species
 summary(sp)
+ggplot(cell_species, aes(x= human_transcripts, y= mouse_transcripts, color= species)) +
+  geom_point(size=2, shape=17,alpha=0.6)+ xlab("human transcripts (x100)") + ylab("mouse transcripts(x100)")  + theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+cell_species<- cell_species %>% 
+  mutate(mouse_transcripts = n_mouse_umi/100,
+   human_transcripts = n_human_umi/100
+)
